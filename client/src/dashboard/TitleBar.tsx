@@ -18,17 +18,6 @@ function TitleBar() {
           CLOVE<span style={{ color: "#d7bf66" }}>ARM</span>
         </span>
       </div>
-      <div className="title-bar-badge-container">
-        {controllerCount > 0 ? (
-          <span className="controller-badge connected">
-            📱 {controllerCount} {controllerCount === 1 ? 'controller' : 'controllers'} connected
-          </span>
-        ) : (
-          <span className="controller-badge disconnected">
-            📱 No controller
-          </span>
-        )}
-      </div>
     </div>
   );
 }
