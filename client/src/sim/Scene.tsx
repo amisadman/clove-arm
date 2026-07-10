@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Grid } from '@react-three/drei'
+import RobotArm from './RobotArm'
 
 function Scene() {
   return (
@@ -30,6 +31,11 @@ function Scene() {
       />
 
       <OrbitControls makeDefault target={[0.3, 0.3, 0]} />
+
+      {/* URDF is Z-up; Three.js is Y-up. Robot and key panel share this frame. */}
+      <group rotation={[-Math.PI / 2, 0, 0]}>
+        <RobotArm />
+      </group>
     </Canvas>
   )
 }
