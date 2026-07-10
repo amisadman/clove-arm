@@ -1,335 +1,230 @@
 # Clove Arm
 
-**Live Link**: [https://clove-arm.vercel.app/](https://clove-arm.vercel.app/)
+<div align="center">
 
-Developed by **Team Clover**:
+**A browser-based 6-DOF robotic arm simulation and control platform**
 
-| Name                      | University              | GitHub / Portfolio                                     |
-| :------------------------ | :---------------------- | :----------------------------------------------------- |
-| **Sadman Islam**          | Metropolitan University | [GitHub: amisadman](https://github.com/amisadman)      |
-| **Shah Samin Yasar**      | Metropolitan University | [Portfolio](https://shahsaminyasar.vercel.app/)        |
-| **Ahmed Thousif Thisham** | Metropolitan University | [Portfolio](https://ahmedthousifportfolio.vercel.app/) |
+Built for the IUT Techathon Nationals Hackathon Final Round by **Team Clover**
+
+</div>
 
 ---
 
-> **A browser-based 6-DOF robotic arm simulation and control platform built for the Vantage Robotics Final Round Hackathon.**
+## Team
 
-Clove Arm is a complete robotic arm simulation that enables engineers to visualize, manually control, validate, and autonomously operate a 6-DOF industrial robotic arm entirely inside a web browser.
-
-Instead of testing experimental control software on expensive physical hardware, Clove Arm provides a safe simulation environment where every motion passes through the same deterministic control pipeline before execution.
-
----
-
-# Overview
-
-The project recreates the complete workflow expected by **Vantage Robotics**, allowing users to:
-
-- Visualize the robotic arm in real-time
-- Control the arm using multiple input methods
-- Compute inverse kinematics for target positions
-- Validate every movement using safety checks
-- Execute autonomous PIN-entry sequences
-- Interact using voice commands
-- Control the arm using natural language through an AI-powered reasoning layer
-
-The entire application is built around **one unified motion pipeline**, ensuring that every control method behaves consistently and safely.
+| Name                      | University              | Links                                                 |
+| :------------------------ | :---------------------- | :---------------------------------------------------- |
+| **Sadman Islam**          | Metropolitan University | [GitHub](https://github.com/amisadman)                |
+| **Shah Samin Yasar**      | Metropolitan University | [Portfolio](https://shahsaminyasar.vercel.app/)       |
+| **Ahmed Thousif Thisham** | Metropolitan University | [Portfolio](https://ahmedthousifportfolio.vercel.app) |
 
 ---
 
-# Project Goals
+## What is Clove Arm?
 
-The project satisfies **all required phases** of the hackathon problem statement and implements the **optional Agentic Voice Control extension**.
+Clove Arm is a complete robotic arm simulation that lets engineers visualize, manually control, validate, and autonomously operate a 6-DOF industrial robotic arm entirely inside a web browser — no physical hardware required.
+
+Instead of testing experimental control software on expensive physical arms, Clove Arm provides a safe simulation environment where every motion passes through the same deterministic pipeline before execution. If it works here, it's ready for real hardware.
+
+<div align="center">
+
+![Dashboard Overview](https://i.ibb.co.com/5x45SnsJ/Dashboard-SS.png)
+
+</div>
+
+---
+
+## Phases
 
 ### Phase 1 — Visualization
 
-- Load and render the provided URDF robot model
-- Live 3D visualization
-- Real-time joint telemetry
-- End-effector position tracking
-- Rendered 6-key test panel from `key.config.json`
+The arm is loaded from a URDF file and rendered live in 3D. Joint states and end-effector position update in real time. The 6-key test panel is placed at the exact coordinates from `key.config.json`.
 
 ---
 
 ### Phase 2 — Manual Control
 
-Multiple control methods share the exact same motion pipeline.
+Four control methods share one motion pipeline: joint sliders, GUI joystick, keyboard, and direct target input. Every input produces the same `MotionCommand` object — the arm cannot tell which control surface sent it.
 
-- Joint sliders
-- GUI joystick
-- Keyboard controls
-- Target position movement using IK
+<div align="center">
+
+![Manual Controls](https://i.ibb.co.com/sdm06FGL/manual-controls-ss.png)
+_Joystick, keyboard shortcuts, and joint sliders in action_
+
+</div>
+
+| Key     | Action                  |
+| :------ | :---------------------- |
+| `W / S` | +X / −X                 |
+| `A / D` | +Y / −Y                 |
+| `Q / E` | +Z / −Z                 |
+| `Shift` | Fine mode (×0.25 speed) |
+| `H`     | Home position           |
+| `?`     | Toggle keymap legend    |
 
 ---
 
 ### Phase 3 — Voice Control
 
-Voice commands can control the robotic arm, including movement and rotation commands such as:
+Spoken commands are captured via the Web Speech API, parsed by a deterministic grammar, and routed through the same pipeline as manual inputs. The arm responds and confirms verbally.
 
-- Move up
-- Move down
-- Move left
-- Move right
-- Rotate base
-- Move to target
+<div align="center">
 
-All recognized commands are translated into structured robot actions before execution.
+![Voice Control](https://i.ibb.co.com/s9w8y7yp/Voice-SS.png)
+_Live transcript, parsed command, and spoken confirmation_
+
+</div>
+
+Supported commands include: _"move up"_, _"move left 5 centimeters"_, _"rotate base 30 degrees"_, _"press key 4"_, _"enter PIN 1 4 2 5 3 6"_, and **AI powered plain text/natural language support**.
 
 ---
 
-### Phase 3B — Agentic Voice Control (Bonus)
+### Phase 3B — Agentic Voice Control _(Bonus)_
 
-Natural language instructions are interpreted using an LLM-powered reasoning layer.
+Free-form natural language is interpreted by an LLM reasoning layer, converted into structured motion commands, validated by the safety gate, and executed. The arm responds in natural language — and speech — confirming what it understood and reporting the outcome.
 
-Examples:
+> _"Move slightly above key 5 and press it twice."_
+> _"Rotate the base 20 degrees then move toward the keypad."_
 
-> "Move slightly above key 5 and press it twice."
-
-> "Rotate the base 20 degrees then move toward the keypad."
-
-The reasoning layer:
-
-- understands free-form instructions
-- converts them into structured robot commands
-- validates every generated action
-- explains failures naturally
-- optionally provides spoken feedback
-
-Every AI-generated action still passes through deterministic safety validation before execution.
+Ambiguous instructions trigger a clarifying question. Out-of-bounds commands are rejected with an explanation. AI output is never executed blindly.
 
 ---
 
 ### Phase 4 — Autonomous PIN Entry
 
-Given a 6-digit PIN, the robot:
+Given a 6-digit PIN, the arm sequences autonomously through each key: hover → descend → touch → tolerance check (±5 mm) → retract → next digit. Every key press is validated and logged with its achieved error in millimetres.
 
-1. Computes target coordinates
-2. Plans the motion
-3. Moves above each key
-4. Performs a downward touch
-5. Verifies successful key presses
-6. Continues until the PIN is complete
+<div align="center">
 
-No hardcoded animations are used—every movement follows the same motion pipeline used by manual control.
+![PIN Entry](https://i.ibb.co.com/kgwtxqX1/Autonomous-Pin-Entry-SS.png)
+_Autonomous PIN sequence with per-key tolerance readout_
+
+</div>
+
+No hardcoded animations — every movement is computed by the same IK solver and motion pipeline used for manual control.
 
 ---
 
 ### Phase 5 — Electrical Schematic
 
-**Wokwi Link** : https://wokwi.com/projects/469131631081158657
+A proof-of-concept circuit for a WiFi-controlled servo arm: ESP32 microcontroller, PCA9685 PWM driver, dual power rails, and labeled connections.
 
-The project includes a proof-of-concept electrical design illustrating:
+<div align="center">
 
-- Servo motors
-- Driver stage
-- Microcontroller
-- Power delivery
-- Wi-Fi communication
-- Overall system architecture
+![Electrical Schematic](https://i.ibb.co.com/QFzj4Xtk/Electrical-Schematic-SS.png)
+_Wokwi circuit: ESP32 + PCA9685 driving 7 servo channels_
+
+</div>
+
+🔗 [View on Wokwi](https://wokwi.com/projects/469131631081158657)
 
 ---
 
-# Architecture
+## Architecture
+
+The core design principle: **one motion pipeline, five triggers**.
 
 ```mermaid
 graph TD
-    subgraph Inputs [User Input]
-        Keyboard[Keyboard]
-        Joystick[Joystick]
-        Voice[Voice / AI]
+    User([User: Keyboard / Joystick / Voice / PIN / Agent]) -->|emits| Bus[Command Bus]
+    Bus --> Executor[Motion Executor]
+
+    subgraph Control Loop
+        Executor --> Gate[Safety Gate]
+        Gate --> Solver[IK Solver · DLS]
+        Solver --> Twin[Solver Twin · FK]
+        Twin --> Solver
+        Solver --> Gate
+        Gate --> Executor
+        Executor --> Robot[Three.js Robot · setJointValue]
     end
-
-    Inputs --> Bus[Motion Command Bus]
-    Bus --> Safety[Safety Validation]
-    Safety --> IK[Inverse Kinematics Solver]
-    IK --> Planner[Motion Planning Pipeline]
-    Planner --> Controller[Robot Joint Controller]
-    Controller --> Engine[3D Simulation Engine]
-    Engine --> Telemetry[Telemetry & Dashboard]
-
-    style Inputs fill:#1e1e1e,stroke:#333,stroke-width:1px,color:#fff
-    style Bus fill:#d7bf66,stroke:#7d651c,stroke-width:1px,color:#121212
-    style Safety fill:#f44336,stroke:#d32f2f,stroke-width:1px,color:#fff
-    style IK fill:#2196f3,stroke:#1976d2,stroke-width:1px,color:#fff
-    style Planner fill:#4caf50,stroke:#388e3c,stroke-width:1px,color:#fff
-    style Controller fill:#2a2a2a,stroke:#333,stroke-width:1px,color:#fff
-    style Engine fill:#2a2a2a,stroke:#333,stroke-width:1px,color:#fff
-    style Telemetry fill:#2a2a2a,stroke:#333,stroke-width:1px,color:#fff
 ```
 
-Every interaction uses the same deterministic pipeline.
-
-# Features
-
-## 3D Simulation
-
-- URDF robot rendering
-- Interactive orbit camera
-- Grid and floor
-- Live animation
-- Keypad visualization
+Every command — manual, scripted, voice, or AI-generated — passes through the same deterministic safety gate before anything moves. This is the same guarantee you'd want before handing the pipeline to real hardware.
 
 ---
 
-## Motion Control
+## Inverse Kinematics
 
-- Forward kinematics
-- Inverse kinematics
-- Jacobian solver
-- Damped Least Squares IK
-- Motion interpolation
-- Smooth trajectories
+IK is solved numerically using **Damped Least Squares** over all 7 joints.
 
----
+Each iteration:
 
-## Manual Controls
+1. Compute the 3×7 Jacobian (numeric differentiation — perturb each joint by 0.0001 rad, measure tip displacement)
+2. Compute tip error: `e = target − fk(q)`
+3. Apply DLS update: `Δq = Jᵀ(JJᵀ + λ²I)⁻¹ · e` with `λ = 0.08`
+4. Clamp joints to URDF limits
+5. Repeat until `‖e‖ < 1 mm` or 30 iterations
 
-- GUI joystick
-- Keyboard movement
-- Joint sliders
-- Target movement
-
----
-
-## Voice Controls
-
-- Speech recognition
-- Command parsing
-- Motion execution
-- Spoken feedback
-
----
-
-## Agentic AI
-
-- Natural language understanding
-- Multi-step reasoning
-- Command generation
-- Safety-aware execution
-- Conversational feedback
-
----
-
-## Autonomous Tasks
-
-- PIN input
-- Motion sequencing
-- Touch validation
-- Automated execution
+Warm-starting from the previous frame's joint angles reduces jogging to 1–3 iterations, maintaining 60 fps. An invisible solver twin (cloned robot) runs all IK iterations without touching the rendered arm.
 
 ---
 
 ## Safety System
 
-Every command—manual, scripted, voice, or AI-generated—passes through the same safety layer.
+Every command is validated before execution:
 
-Safety validation includes:
+| Check            | Detail                                                |
+| :--------------- | :---------------------------------------------------- |
+| Workspace bounds | Target z ≥ 0, radial reach ≤ 1.45 m                   |
+| Reachability     | IK must converge within 5 mm                          |
+| Joint limits     | Each joint clamped to URDF limits                     |
+| Motion rate      | No single joint jumps > 1.5 rad without interpolation |
 
-- Workspace bounds
-- Reachability checks
-- Joint limit validation
-- Motion constraints
-- Invalid command rejection
-
----
-
-# Tech Stack
-
-### Frontend
-
-- React
-- TypeScript
-- Vite
-
-### 3D Rendering
-
-- Three.js
-- React Three Fiber
-- Drei
-- URDF Loader
-
-### Robotics
-
-- Forward Kinematics
-- Inverse Kinematics
-- Jacobian-based IK
-- Damped Least Squares Solver
-
-### AI & Voice
-
-- Speech Recognition API
-- LLM-powered reasoning
-- Text-to-Speech
+Rejected commands surface a human-readable reason in the UI and are never executed — including AI-generated commands.
 
 ---
 
-# ▶ Getting Started
+## Remote Controller
 
-Clone the repository
+Open `/controller` on any device to get a mobile joystick that drives the arm remotely via Socket.io.
+
+<div align="center">
+
+![Remote Controller](https://i.ibb.co.com/k2Hwmcsc/Controller-SS.png)
+
+</div>
+
+The controller emits the same `MotionCommand` objects as every other input mode. The arm cannot tell it apart from the keyboard.
+
+🔗 [Controller Page Link](https://clove-arm.vercel.app/controller)
+
+---
+
+## Tech Stack
+
+| Layer        | Technology                                  |
+| :----------- | :------------------------------------------ |
+| Frontend     | React, TypeScript, Vite                     |
+| 3D Rendering | Three.js, React Three Fiber, Drei           |
+| URDF Loading | urdf-loader                                 |
+| Robotics     | Forward Kinematics, Damped Least Squares IK |
+| Voice        | Web Speech API (STT + TTS)                  |
+| Agentic AI   | LLM reasoning layer via Groq API            |
+| Server       | Express, Socket.io                          |
+
+---
+
+## Setup Guide
 
 ```bash
-git clone https://github.com/amisadman/clove-arm.git
-```
+# Clone
+git clone https://github.com/amisadman/clove-arm_TeamClover.git
 
-Install dependencies
-
-```bash
-cd client
+# Terminal 1 — Server
+cd ./server
 npm install
-```
-
-Run the development server
-
-```bash
 npm run dev
+
+# Terminal 2 — Client
+cd ./client
+npm install
+npm run dev
+
+# Client ENV variable
+VITE_GROQ_API_KEY=your_qroq_api_key_here
+VITE_SERVER_URL=the_server_url
+
 ```
 
-Open the URL shown by Vite.
-
----
-
-# Usage
-
-You can control the robotic arm using:
-
-- Joint sliders
-- GUI joystick
-- Keyboard
-- Voice commands
-- Natural language (Agentic AI)
-- Autonomous PIN entry
-
-All control methods share the same motion pipeline and safety validation.
-
----
-
-# Safety First
-
-The project follows a deterministic control architecture.
-
-Every requested movement is validated before execution.
-
-Commands that violate:
-
-- workspace boundaries
-- joint limits
-- reachability constraints
-- malformed AI outputs
-
-are rejected safely.
-
----
-
-# Hackathon Deliverables
-
-- Browser-based 6-DOF robotic arm simulation
-- URDF visualization
-- Dashboard with live telemetry
-- Inverse kinematics
-- GUI joystick control
-- Keyboard control
-- Voice control
-- Autonomous PIN entry
-- Electrical schematic
-- Agentic natural language voice control (Bonus)
-
----
+Open the URL shown by Vite. For the remote controller, open `{{CLIENT_URL}}/controller` on any device _(under the same WiFi IF SERVER IS RUNNING IN LOCALHOST)_.
