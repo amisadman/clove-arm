@@ -103,20 +103,33 @@ io.on('connection', (socket) => {
   });
 });
 
+// Virtual/VPN adapters (VirtualBox, VMware, Hyper-V, Docker, WSL, tunnels)
+// commonly enumerate before the real WiFi/Ethernet adapter on Windows, and
+// their IPs aren't reachable from a phone on the actual home network — skip
+// them so the printed URL is one a phone can actually connect to.
+const VIRTUAL_ADAPTER_PATTERN = /virtual|vpn|vethernet|docker|wsl|loopback|hyper-v|tailscale|zerotier|tunnel/i;
+
 function getLocalIp() {
   const nets = networkInterfaces();
+  const candidates = [];
+
   for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-      // Skip over non-IPv4 and internal addresses
+    for (const net of nets[name] ?? []) {
       if (net.family === 'IPv4' && !net.internal) {
-        return net.address;
+        candidates.push({ name, address: net.address });
       }
     }
   }
-  return 'localhost';
+
+  const preferred = candidates.find((c) => !VIRTUAL_ADAPTER_PATTERN.test(c.name));
+  return (preferred ?? candidates[0])?.address ?? 'localhost';
 }
 
-server.listen(PORT, () => {
+// Bind explicitly to 0.0.0.0 rather than relying on the implicit default —
+// on Windows in particular, omitting the host can bind only to the IPv6 "::"
+// address in some network configurations, silently refusing the IPv4
+// connections phones on the LAN actually make.
+server.listen(PORT, '0.0.0.0', () => {
   const localIp = getLocalIp();
   console.log(`\n======================================================`);
   console.log(`Relay Server running locally at: http://localhost:${PORT}`);

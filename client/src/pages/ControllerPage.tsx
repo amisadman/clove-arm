@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import socket from '../socket/socket';
+import socket, { SERVER_URL } from '../socket/socket';
 import type { RemoteCommand } from '../pipeline/commandBus';
 import './ControllerPage.css';
 
@@ -38,9 +38,11 @@ export default function ControllerPage() {
 
   const padRef = useRef<HTMLDivElement>(null);
   const knobOffsetRef = useRef(knobOffset);
-  knobOffsetRef.current = knobOffset;
+  useEffect(() => {
+    knobOffsetRef.current = knobOffset;
+  }, [knobOffset]);
 
-  const zTimerRef = useRef<any>(null);
+  const zTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Single choke point for every outgoing command — typed against the
   // pipeline's real RemoteCommand shape so a field-name typo (e.g. dx/dy/dz
@@ -68,8 +70,7 @@ export default function ControllerPage() {
     socket.on('disconnect', handleDisconnect);
 
     // Fetch key configs
-    const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
-    fetch(`${serverUrl}/api/key-config`)
+    fetch(`${SERVER_URL}/api/key-config`)
       .then((res) => {
         if (!res.ok) throw new Error('API error');
         return res.json() as Promise<KeyConfig>;
