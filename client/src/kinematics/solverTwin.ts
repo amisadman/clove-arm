@@ -1,4 +1,4 @@
-import { Vector3 } from 'three'
+import { Vector3, Quaternion } from 'three'
 import type { URDFRobot } from 'urdf-loader'
 import { getRobot, subscribeRobot } from '../sim/robotStore'
 import { JOINT_ORDER, FALLBACK_JOINT_LIMITS, type JointVector, type JointName } from './jointOrder'
@@ -9,6 +9,9 @@ import { JOINT_ORDER, FALLBACK_JOINT_LIMITS, type JointVector, type JointName } 
  */
 let twin: URDFRobot | null = null
 const tipWorld = new Vector3()
+const tipQuaternion = new Quaternion()
+const baseQuaternion = new Quaternion()
+const tipZAxis = new Vector3()
 
 function buildTwin(): URDFRobot | null {
   const robot = getRobot()
@@ -40,6 +43,33 @@ export function fk(q: JointVector): Vector3 {
   tip.getWorldPosition(tipWorld)
   t.worldToLocal(tipWorld)
   return tipWorld.clone()
+}
+
+export interface OrientedPose {
+  position: Vector3
+  /** Stylus tip's local +Z axis, expressed in base_link frame. */
+  zAxis: Vector3
+}
+
+/** Like fk(), but also returns the stylus tip's Z-axis direction (for the optional orientation bias). */
+export function fkOriented(q: JointVector): OrientedPose {
+  const t = ensureTwin()
+  if (!t) return { position: new Vector3(), zAxis: new Vector3(0, 0, 1) }
+
+  JOINT_ORDER.forEach((name, i) => t.setJointValue(name, q[i]))
+  t.updateMatrixWorld(true)
+
+  const tip = t.links['stylus_tip']
+  if (!tip) return { position: new Vector3(), zAxis: new Vector3(0, 0, 1) }
+
+  tip.getWorldPosition(tipWorld)
+  t.worldToLocal(tipWorld)
+
+  tip.getWorldQuaternion(tipQuaternion)
+  t.getWorldQuaternion(baseQuaternion)
+  tipZAxis.set(0, 0, 1).applyQuaternion(tipQuaternion).applyQuaternion(baseQuaternion.invert())
+
+  return { position: tipWorld.clone(), zAxis: tipZAxis.clone() }
 }
 
 /** URDF joint limits, read from the live robot with a static fallback. */

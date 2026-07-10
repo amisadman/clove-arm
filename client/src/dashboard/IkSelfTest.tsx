@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { runIkSelfTest, solveIK } from '../kinematics/ikDLS'
 import { JOINT_ORDER } from '../kinematics/jointOrder'
 import { getKeyConfig } from '../sim/keyConfig'
+import { isOrientationBiasEnabled, setOrientationBiasEnabled } from '../kinematics/orientationBiasStore'
 import { pushToast } from './toast'
 import './IkSelfTest.css'
 
@@ -35,6 +36,7 @@ function runSelfTest() {
 function IkSelfTest() {
   const [running, setRunning] = useState(false)
   const [lastResult, setLastResult] = useState<string | null>(null)
+  const [orientationBias, setOrientationBiasState] = useState(isOrientationBiasEnabled())
 
   const handleClick = () => {
     setRunning(true)
@@ -46,12 +48,25 @@ function IkSelfTest() {
     })
   }
 
+  const handleToggleOrientation = (checked: boolean) => {
+    setOrientationBiasEnabled(checked)
+    setOrientationBiasState(checked)
+  }
+
   return (
     <div className="ik-self-test">
       <button type="button" onClick={handleClick} disabled={running}>
         {running ? 'Running…' : 'IK self-test (25 targets)'}
       </button>
       {lastResult && <div className="ik-self-test-result">{lastResult}</div>}
+      <label className="ik-orientation-toggle">
+        <input
+          type="checkbox"
+          checked={orientationBias}
+          onChange={(event) => handleToggleOrientation(event.target.checked)}
+        />
+        Stylus-down orientation bias (6-row IK)
+      </label>
     </div>
   )
 }
