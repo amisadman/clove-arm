@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Grid, Environment, ContactShadows, SoftShadows } from '@react-three/drei'
+import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei'
 import RobotArm from './RobotArm'
 import KeyPanel from './KeyPanel'
 import TelemetryUpdater from './TelemetryUpdater'
@@ -8,12 +8,11 @@ import TelemetryUpdater from './TelemetryUpdater'
 function Scene() {
   return (
     <Canvas
-      shadows
+      shadows="soft"
       camera={{ position: [1.2, 0.9, 1.2], fov: 45 }}
       style={{ width: '100%', height: '100%', background: '#15171c' }}
     >
       <color attach="background" args={['#15171c']} />
-      <SoftShadows size={12} samples={12} focus={0.6} />
 
       <ambientLight intensity={0.4} />
       <directionalLight
