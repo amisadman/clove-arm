@@ -77,9 +77,19 @@ function MotionExecutor() {
     () =>
       subscribe((command) => {
         if (command.type === 'JOG') {
-          jogAccumRef.current.x += command.delta.x
-          jogAccumRef.current.y += command.delta.y
-          jogAccumRef.current.z += command.delta.z
+          const { x, y, z } = command.delta
+          // Commands can arrive over the network (remote controller relay),
+          // where TypeScript's compile-time shape checks don't apply at
+          // runtime — a malformed delta must be dropped here rather than
+          // silently poisoning the accumulator with NaN, which would make
+          // every subsequent IK solve fail forever.
+          if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+            console.warn('[motionExecutor] ignoring non-finite JOG delta:', command.delta)
+            return
+          }
+          jogAccumRef.current.x += x
+          jogAccumRef.current.y += y
+          jogAccumRef.current.z += z
         } else {
           pendingCommandRef.current = command
         }

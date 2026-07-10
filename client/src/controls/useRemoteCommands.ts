@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import socket from '../socket/socket';
-import { emit as emitCommand } from '../pipeline/commandBus';
+import { emit as emitCommand, type RemoteCommand } from '../pipeline/commandBus';
 import { runPin } from '../pipeline/pinSequencer';
 import { setControllerCount } from './remoteStore';
 
@@ -10,7 +10,7 @@ export default function useRemoteCommands() {
     socket.emit('register', 'dashboard');
 
     // Handle commands
-    const handleCommand = (cmd: any) => {
+    const handleCommand = (cmd: RemoteCommand) => {
       if (cmd.type === 'ENTER_PIN') {
         runPin(cmd.pin);
       } else {

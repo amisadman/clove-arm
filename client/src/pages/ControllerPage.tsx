@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import socket from '../socket/socket';
+import type { RemoteCommand } from '../pipeline/commandBus';
 import './ControllerPage.css';
 
 interface KeyCoords {
@@ -40,6 +41,15 @@ export default function ControllerPage() {
   knobOffsetRef.current = knobOffset;
 
   const zTimerRef = useRef<any>(null);
+
+  // Single choke point for every outgoing command — typed against the
+  // pipeline's real RemoteCommand shape so a field-name typo (e.g. dx/dy/dz
+  // instead of x/y/z) fails to compile instead of silently feeding NaN into
+  // the IK solver on the dashboard end.
+  const emitRemote = (command: RemoteCommand) => {
+    socket.emit('command', command);
+    setLastCommand(JSON.stringify(command));
+  };
 
   // Monitor Socket connections
   useEffect(() => {
@@ -89,9 +99,7 @@ export default function ControllerPage() {
         // Jog displacement per interval: velocity * dt where dt = 1/30s
         const dx = x * 0.15 * (1 / 30);
         const dy = -y * 0.15 * (1 / 30); // inverted so up on knob moves +Y
-        const command = { type: 'JOG', delta: { dx, dy, dz: 0 } };
-        socket.emit('command', command);
-        setLastCommand(JSON.stringify(command));
+        emitRemote({ type: 'JOG', delta: { x: dx, y: dy, z: 0 } });
       }, 1000 / 30);
 
       return () => clearInterval(timer);
@@ -134,9 +142,7 @@ export default function ControllerPage() {
   const startZ = (dir: 1 | -1) => {
     if (zTimerRef.current) clearInterval(zTimerRef.current);
     const tickZ = () => {
-      const command = { type: 'JOG', delta: { dx: 0, dy: 0, dz: dir * 0.004 } };
-      socket.emit('command', command);
-      setLastCommand(JSON.stringify(command));
+      emitRemote({ type: 'JOG', delta: { x: 0, y: 0, z: dir * 0.004 } });
     };
     tickZ();
     zTimerRef.current = setInterval(tickZ, 33);
@@ -151,27 +157,21 @@ export default function ControllerPage() {
 
   // Command button triggers
   const handleHome = () => {
-    const command = { type: 'HOME' };
-    socket.emit('command', command);
-    setLastCommand(JSON.stringify(command));
+    emitRemote({ type: 'HOME' });
   };
 
   const handleMoveToKey = (coords: KeyCoords) => {
-    const command = {
+    emitRemote({
       type: 'MOVE_TO',
-      target: { x: coords.x, y: coords.y, z: coords.z + 0.06 }
-    };
-    socket.emit('command', command);
-    setLastCommand(JSON.stringify(command));
+      target: { x: coords.x, y: coords.y, z: coords.z + 0.06 },
+    });
   };
 
   const handleStop = () => {
     stopZ();
     setIsDragging(false);
     setKnobOffset({ x: 0, y: 0 });
-    const command = { type: 'HOME' };
-    socket.emit('command', command);
-    setLastCommand(JSON.stringify(command));
+    emitRemote({ type: 'HOME' });
   };
 
   // PIN validation & submission
@@ -186,9 +186,7 @@ export default function ControllerPage() {
       setPinError('PIN must be exactly 6 digits.');
       return;
     }
-    const command = { type: 'ENTER_PIN', pin: pinInput };
-    socket.emit('command', command);
-    setLastCommand(JSON.stringify(command));
+    emitRemote({ type: 'ENTER_PIN', pin: pinInput });
   };
 
   return (
