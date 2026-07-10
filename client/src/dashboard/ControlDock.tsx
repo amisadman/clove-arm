@@ -1,45 +1,50 @@
-import { useState } from 'react'
-import JointControls from './JointControls'
-import MoveToPanel from './MoveToPanel'
-import PinPanel from './PinPanel'
-import Popup from './Popup'
-import './ControlDock.css'
+import { useState } from "react";
+import JointControls from "./JointControls";
+import MoveToPanel from "./MoveToPanel";
+import PinPanel from "./PinPanel";
+import Popup from "./Popup";
+import "./ControlDock.css";
+import VoiceControl from "../controls/VoiceControl";
 
-type PopupKey = 'joints' | 'moveTo'
+type PopupKey = "joints" | "moveTo";
 
 const POPUP_TITLES: Record<PopupKey, string> = {
-  joints: 'Joint Controls',
-  moveTo: 'Go To Target',
-}
+  joints: "Joint Controls",
+  moveTo: "Go To Target",
+};
 
 function ControlDock() {
-  const [active, setActive] = useState<PopupKey | null>(null)
+  const [active, setActive] = useState<PopupKey | null>(null);
 
   const toggle = (key: PopupKey) => {
-    setActive((prev) => (prev === key ? null : key))
-  }
+    setActive((prev) => (prev === key ? null : key));
+  };
 
   return (
     <>
       <div className="control-dock-left">
         {active && (
-          <Popup key={active} title={POPUP_TITLES[active]} onClose={() => setActive(null)}>
-            {active === 'joints' ? <JointControls /> : <MoveToPanel />}
+          <Popup
+            key={active}
+            title={POPUP_TITLES[active]}
+            onClose={() => setActive(null)}
+          >
+            {active === "joints" ? <JointControls /> : <MoveToPanel />}
           </Popup>
         )}
 
         <div className="dock-triggers">
           <button
             type="button"
-            className={`dock-trigger${active === 'joints' ? ' dock-trigger-active' : ''}`}
-            onClick={() => toggle('joints')}
+            className={`dock-trigger${active === "joints" ? " dock-trigger-active" : ""}`}
+            onClick={() => toggle("joints")}
           >
             Joint Controls
           </button>
           <button
             type="button"
-            className={`dock-trigger${active === 'moveTo' ? ' dock-trigger-active' : ''}`}
-            onClick={() => toggle('moveTo')}
+            className={`dock-trigger${active === "moveTo" ? " dock-trigger-active" : ""}`}
+            onClick={() => toggle("moveTo")}
           >
             Go To Target
           </button>
@@ -47,12 +52,14 @@ function ControlDock() {
       </div>
 
       <div className="control-dock-center">
+        <VoiceControl />
+
         <div className="pin-bar">
           <PinPanel />
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default ControlDock
+export default ControlDock;

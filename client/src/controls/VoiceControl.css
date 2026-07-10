@@ -1,7 +1,5 @@
 .voice-control {
-  position: absolute;
-  right: 300px;
-  bottom: 24px;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,6 +22,9 @@
   min-width: 160px;
   max-width: 230px;
   animation: voice-status-in 0.15s ease-out;
+  position: absolute;
+  bottom: 0px;
+  left: 100%;
 }
 
 @keyframes voice-status-in {

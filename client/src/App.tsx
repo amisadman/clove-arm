@@ -1,12 +1,12 @@
-import Scene from './sim/Scene'
-import TitleBar from './dashboard/TitleBar'
-import ToastHost from './dashboard/ToastHost'
-import Joystick from './controls/Joystick'
-import KeymapLegend from './controls/KeymapLegend'
-import CoordinateCard from './dashboard/CoordinateCard'
-import StatusCard from './dashboard/StatusCard'
-import ControlDock from './dashboard/ControlDock'
-import VoiceControl from './controls/VoiceControl'
+import Scene from "./sim/Scene";
+import TitleBar from "./dashboard/TitleBar";
+import ToastHost from "./dashboard/ToastHost";
+import Joystick from "./controls/Joystick";
+import KeymapLegend from "./controls/KeymapLegend";
+import CoordinateCard from "./dashboard/CoordinateCard";
+import StatusCard from "./dashboard/StatusCard";
+import ControlDock from "./dashboard/ControlDock";
+import VoiceControl from "./controls/VoiceControl";
 
 function App() {
   return (
@@ -18,10 +18,9 @@ function App() {
       <ToastHost />
       <Joystick />
       <KeymapLegend />
-      <VoiceControl/>
       <ControlDock />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
