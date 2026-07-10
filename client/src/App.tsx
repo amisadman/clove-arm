@@ -6,6 +6,7 @@ import KeymapLegend from './controls/KeymapLegend'
 import CoordinateCard from './dashboard/CoordinateCard'
 import StatusCard from './dashboard/StatusCard'
 import ControlDock from './dashboard/ControlDock'
+import VoiceControl from './controls/VoiceControl'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       <ToastHost />
       <Joystick />
       <KeymapLegend />
+      <VoiceControl/>
       <ControlDock />
     </div>
   )
